@@ -158,6 +158,34 @@ tr.click{cursor:pointer} tr.click:hover td{background:#FAFBFE}
 .meter{height:8px;background:var(--paper);border-radius:8px;overflow:hidden;margin:6px 0 12px}
 .meter i{display:block;height:100%;background:var(--blue);border-radius:8px}
 
+.mb{margin-bottom:16px}.mb8{margin-bottom:10px}
+.lbl{display:block;color:var(--muted);font-size:12.5px;margin-bottom:5px}
+.kpi .kv1{display:block;margin-top:4px;line-height:1.2}
+.kpi .kv1 .num{font-size:28px;display:inline}
+.kpi .kv1 small{display:inline}
+.dc{display:grid;gap:12px;align-content:start}
+.dc h3{margin:0}
+.dc .cur{display:flex;gap:12px;align-items:center;background:var(--ink);color:#fff;border-radius:12px;padding:10px 14px}
+.dc .cur .num{font-size:30px;color:var(--sun);line-height:1}
+.dc .cur b{display:block;font-weight:600}
+.dc .cur small{color:#A9B3D6;font-size:12.5px}
+.slots{display:flex;gap:6px;flex-wrap:wrap}
+.slot{padding:3px 10px;border:1px solid var(--line);border-radius:8px;font-family:var(--mono);font-size:13px;background:#fff;direction:ltr}
+.slot:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-soft)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:14.5px}
+.kv dt{color:var(--muted)}.kv dd{margin:0}
+.kv.inv{grid-template-columns:1fr auto;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.kv.inv dt{color:var(--ink)}
+.alert{background:var(--rose-soft);color:#A8203F;padding:9px 14px;border-radius:10px;font-weight:600;font-size:14px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tags .tagx{margin:0;padding:3px 10px;font-size:13.5px}
+.tagx button{color:inherit;font-size:15px;line-height:1;padding:0 2px}
+.inline{display:flex;gap:8px}
+.f3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+textarea.in{min-height:72px;resize:vertical;font:inherit}
+.rxl.bad{color:#A8203F}
+.rxl.bad b::after{content:" ⚠ حساسية";font-size:12px}
+.dlg{max-height:92vh;overflow:auto}
 .ov{position:fixed;inset:0;background:rgba(14,26,58,.45);display:grid;place-items:center;padding:16px;z-index:50}
 .dlg{background:#fff;border-radius:18px;padding:24px;width:min(460px,100%)}
 .dlg h3{font-family:var(--disp);font-size:18px;margin-bottom:14px}
@@ -201,246 +229,6 @@ tr.click{cursor:pointer} tr.click:hover td{background:#FAFBFE}
 </div>
 <div id="modal"></div><div id="toast" role="status"></div>
 
-<script>
-const P={home:'<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>',cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',users:'<circle cx="9" cy="8" r="3.500"/><path d="M2.500 20c.600-3.600 3.200-5.500 6.500-5.500s5.900 1.900 6.500 5.500M16 4.600a3.500 3.500 0 010 6.800M18.500 14.800c1.700.800 2.700 2.500 3 5.200"/>',wallet:'<rect x="3" y="6" width="18" height="14" rx="2"/><path d="M3 10h18M15 15h3"/>',chart:'<path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/>',shield:'<path d="M12 3l8 3v6c0 4.500-3.200 7.800-8 9-4.800-1.200-8-4.500-8-9V6z"/><path d="M9 12l2 2 4-4"/>',star:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M7 15h4"/>',build:'<path d="M5 21V5a2 2 0 012-2h7a2 2 0 012 2v16M16 9h2a1 1 0 011 1v11M3 21h18M9 7h3M9 11h3M9 15h3"/>',lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/>',plus:'<path d="M12 5v14M5 12h14"/>',search:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.500-3.500"/>',menu:'<path d="M4 7h16M4 12h16M4 17h16"/>',x:'<path d="M6 6l12 12M18 6L6 18"/>',back:'<path d="M9 6l6 6-6 6"/>'};
-const ic=n=>`<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.800" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n]}</svg>`;
-const $=s=>document.querySelector(s), fmt=n=>`<span class="num">${n.toLocaleString('en-US')}</span>`;
-
-const ROLES={
-  owner:{name:'د. كريم الشاذلي',title:'صاحب العيادة',chip:'صاحب العيادة'},
-  doctor:{name:'د. سلمى فؤاد',title:'طبيبة أطفال',chip:'الطبيب'},
-  reception:{name:'منة عادل',title:'موظفة استقبال',chip:'الاستقبال'},
-  accountant:{name:'هاني رزق',title:'محاسب',chip:'المحاسب'},
-  platform:{name:'إدارة كَشْف',title:'مالك المنصة',chip:'إدارة المنصة (البائع)'}
-};
-const MODS=[
-  {id:'today',label:'اليوم',icon:'home',desc:'ملخص اليوم والدور الحالي'},
-  {id:'queue',label:'المواعيد والدور',icon:'cal',desc:'الحجز وتسجيل الوصول وترتيب الدور'},
-  {id:'patients',label:'المرضى',icon:'users',desc:'البيانات الأساسية وأرقام التواصل'},
-  {id:'clinical',label:'الملف الطبي والروشتات',icon:'lock',desc:'التشخيص والزيارات والمرفقات',nav:false},
-  {id:'billing',label:'المدفوعات',icon:'wallet',desc:'التحصيل والمستحقات والإيصالات'},
-  {id:'reports',label:'التقارير',icon:'chart',desc:'الدخل وأعداد الزيارات'},
-  {id:'team',label:'الفريق والصلاحيات',icon:'shield',desc:'دعوة الأعضاء وتحديد صلاحياتهم'},
-  {id:'plan',label:'الاشتراك',icon:'star',desc:'الباقة والتجديد والفواتير'}
-];
-const perms={
-  owner:{today:1,queue:1,patients:1,clinical:1,billing:1,reports:1,team:1,plan:1},
-  doctor:{today:1,queue:1,patients:1,clinical:1},
-  reception:{today:1,queue:1,patients:1,billing:1},
-  accountant:{today:1,billing:1,reports:1}
-};
-const ST={book:['محجوز','c-book'],wait:['في الانتظار','c-wait'],in:['في الكشف','c-in'],done:['انتهى','c-done']};
-let queue=[
-  {n:1,pid:1,name:'ياسين محمود',type:'كشف',time:'10:00',status:'done',fee:350,paid:350},
-  {n:2,pid:2,name:'ملك إبراهيم',type:'متابعة',time:'10:20',status:'done',fee:150,paid:150},
-  {n:3,pid:3,name:'عمر طارق',type:'كشف',time:'10:40',status:'done',fee:350,paid:0},
-  {n:4,pid:4,name:'جنى أشرف',type:'تطعيم',time:'11:00',status:'in',fee:500,paid:500},
-  {n:5,pid:5,name:'آدم سامح',type:'كشف',time:'11:20',status:'wait',fee:350,paid:350},
-  {n:6,pid:6,name:'ليلى حسام',type:'استشارة',time:'11:40',status:'wait',fee:200,paid:0},
-  {n:7,pid:7,name:'يوسف نبيل',type:'كشف',time:'12:00',status:'book',fee:350,paid:0},
-  {n:8,pid:1,name:'فريدة خالد',type:'متابعة',time:'12:20',status:'book',fee:150,paid:0}
-];
-const patients=[
-  {id:1,name:'ياسين محمود',age:'6 سنين',phone:'0100 245 7781',last:'اليوم',bal:0,allergy:['بنسلين'],chronic:['ربو']},
-  {id:2,name:'ملك إبراهيم',age:'3 سنين',phone:'0122 908 1140',last:'اليوم',bal:0,allergy:[],chronic:[]},
-  {id:3,name:'عمر طارق',age:'9 سنين',phone:'0111 630 2295',last:'اليوم',bal:350,allergy:['فول سوداني'],chronic:[]},
-  {id:4,name:'جنى أشرف',age:'سنة ونص',phone:'0155 412 0036',last:'اليوم',bal:0,allergy:[],chronic:[]},
-  {id:5,name:'آدم سامح',age:'4 سنين',phone:'0100 771 5902',last:'28 أكتوبر',bal:0,allergy:[],chronic:['أنيميا']},
-  {id:6,name:'ليلى حسام',age:'7 سنين',phone:'0127 305 6648',last:'14 أكتوبر',bal:600,allergy:[],chronic:[]},
-  {id:7,name:'يوسف نبيل',age:'11 سنة',phone:'0109 882 4417',last:'2 سبتمبر',bal:0,allergy:['إيبوبروفين'],chronic:['سكر نوع 1']}
-];
-let rx=[{d:'أموكسيسيلين شراب 250',dose:'5 مل كل 8 ساعات',dur:'7 أيام'},{d:'باراسيتامول شراب',dose:'5 مل عند اللزوم',dur:'3 أيام'}];
-const team=[
-  {name:'د. كريم الشاذلي',role:'owner',st:'نشط'},{name:'د. سلمى فؤاد',role:'doctor',st:'نشط'},
-  {name:'منة عادل',role:'reception',st:'نشط'},{name:'هاني رزق',role:'accountant',st:'دعوة مرسلة'}
-];
-let clinics=[
-  {name:'عيادة الشاذلي للأطفال',city:'المنصورة',plan:'العيادة',price:699,st:'نشط',end:'9 ديسمبر'},
-  {name:'مركز ابتسامة للأسنان',city:'طنطا',plan:'المركز',price:1299,st:'نشط',end:'2 ديسمبر'},
-  {name:'عيادة د. هبة للجلدية',city:'أسيوط',plan:'الطبيب',price:349,st:'تجربة',end:'باقي 4 أيام'},
-  {name:'عيادة النور للباطنة',city:'الإسكندرية',plan:'العيادة',price:699,st:'متأخر',end:'انتهى 6 نوفمبر'},
-  {name:'عيادة د. مينا للعظام',city:'المنيا',plan:'الطبيب',price:349,st:'تجربة',end:'باقي 11 يوم'},
-  {name:'مركز الحياة لطب الأسرة',city:'القاهرة',plan:'المركز',price:1299,st:'موقوف',end:'موقوف من 20 أكتوبر'}
-];
-let S={role:'owner',view:'today',filter:'all',pid:null,ptab:'visits',q:''};
-const can=m=>S.role!=='platform'&&!!perms[S.role][m];
-
-function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2400)}
-function go(v){S.view=v;S.pid=null;render();$('#side').classList.remove('open');scrollTo(0,0)}
-
-function render(){
-  const plat=S.role==='platform', r=ROLES[S.role];
-  $('#roles').innerHTML=Object.keys(ROLES).map(k=>(k==='platform'?'<span class="sep"></span>':'')+`<button class="${k===S.role?'on':''}" data-act="role" data-v="${k}">${ROLES[k].chip}</button>`).join('');
-  $('#clinic').innerHTML=plat?'<b>لوحة مالك المنصة</b>كل العيادات المشتركة':'<b>عيادة الشاذلي للأطفال</b>المنصورة · باقة العيادة';
-  const nav=plat?[{id:'clinics',label:'العيادات المشتركة',icon:'build'}]:MODS.filter(m=>m.nav!==false&&can(m.id));
-  if(!nav.find(m=>m.id===S.view))S.view=nav[0].id;
-  const waiting=queue.filter(x=>x.status==='wait').length;
-  $('#nav').innerHTML=nav.map(m=>`<button class="${m.id===S.view?'on':''}" data-act="go" data-v="${m.id}">${ic(m.icon)}${m.label}${m.id==='queue'&&waiting?`<span class="cnt num">${waiting}</span>`:''}</button>`).join('');
-  $('#me').innerHTML=`<span class="av">${r.name.replace('د. ','')[0]}</span><span><b>${r.name}</b>${r.title}</span>`;
-  $('#title').textContent=plat?'العيادات المشتركة':MODS.find(m=>m.id===S.view).label;
-  $('#bookBtn').style.display=can('queue')?'':'none';
-  $('.search').style.visibility=can('patients')?'visible':'hidden';
-  $('#view').innerHTML=VIEWS[S.view]();
-}
-
-const lockPanel=t=>`<div class="lockp">${ic('lock')}<b>${t}</b>الجزء ده مش ضمن صلاحيات دورك. صاحب العيادة يقدر يفعّله من «الفريق والصلاحيات».</div>`;
-function qRow(x){
-  const [l,c]=ST[x.status]; let a='';
-  if(x.status==='book'&&can('queue'))a=`<button class="btn sm ghost" data-act="st" data-n="${x.n}" data-v="wait">سجّل الوصول</button>`;
-  else if(x.status==='wait'&&can('clinical'))a=`<button class="btn sm" data-act="st" data-n="${x.n}" data-v="in">ابدأ الكشف</button>`;
-  else if(x.status==='in'&&can('clinical'))a=`<button class="btn sm" data-act="st" data-n="${x.n}" data-v="done">أنهِ الكشف</button>`;
-  if(x.status!=='book'&&x.paid<x.fee&&can('billing'))a+=` <button class="btn sm sun" data-act="pay" data-n="${x.n}">حصّل ${x.fee-x.paid} ج.م</button>`;
-  return `<div class="row-i"><span class="qn num">${x.n}</span><span class="who"><b>${x.name}</b><span>${x.type} · <span class="num">${x.time}</span></span></span><span class="chip ${c}">${l}</span>${a}</div>`;
-}
-function ticket(){
-  const cur=queue.find(x=>x.status==='in'), nx=queue.find(x=>x.status==='wait');
-  if(!cur)return `<div class="ticket"><div class="no"><small>الدور الآن</small><span class="num">—</span></div><div class="info"><b>مفيش مريض في الكشف</b><span>${nx?`التالي: ${nx.name} (رقم ${nx.n})`:'الدور خلص'}</span>${nx&&can('clinical')?`<div class="row"><button class="btn sm sun" data-act="st" data-n="${nx.n}" data-v="in">نادِ التالي</button></div>`:''}</div></div>`;
-  const p=patients.find(p=>p.id===cur.pid);
-  return `<div class="ticket"><div class="no"><small>الدور الآن</small><span class="num">${String(cur.n).padStart(2,'0')}</span></div><div class="info"><b>${cur.name}</b><span>${cur.type} · دخل <span class="num">${cur.time}</span>${nx?` · التالي: ${nx.name}`:''}</span>
-  <div class="row">${can('clinical')?`<button class="btn sm sun" data-act="open" data-id="${p.id}">افتح الملف الطبي</button><button class="btn sm ghost" data-act="st" data-n="${cur.n}" data-v="done">أنهِ الكشف</button>`:`<span class="chip c-in">الطبيب مع المريض الآن</span>`}</div></div></div>`;
-}
-const week=[['سبت',62],['أحد',80],['اثنين',55],['ثلاثاء',91],['أربعاء',74,1],['خميس',0],['جمعة',0]];
-const barsHtml=d=>`<div class="bars">${d.map(([l,h,hi])=>`<div class="${hi?'hi':''}"><i style="height:${h||3}%"></i>${l}</div>`).join('')}</div>`;
-
-const VIEWS={
-today(){
-  const inc=queue.reduce((s,x)=>s+x.paid,0), due=queue.filter(x=>x.status!=='book').reduce((s,x)=>s+x.fee-x.paid,0);
-  const money=can('billing'), w=queue.filter(x=>x.status==='wait').length, done=queue.filter(x=>x.status==='done').length;
-  const k=(l,v,e,c='')=>`<div class="card kpi"><small>${l}</small>${v}<em class="${c}">${e}</em></div>`;
-  const lk=l=>`<div class="card kpi locked"><small>${l}</small><span class="num">•••</span><em style="color:inherit">خارج صلاحياتك</em></div>`;
-  return `<div class="hello">صباح الخير، ${ROLES[S.role].name}</div><div class="sub">الأربعاء 11 نوفمبر · ${queue.length} مواعيد النهارده، منهم ${w} في الانتظار</div>
-  <div class="grid g4" style="margin-bottom:16px">
-    ${k('مواعيد اليوم',fmt(queue.length),`${done} خلصوا`)}${k('في الانتظار',fmt(w),'متوسط الانتظار 12 دقيقة')}
-    ${money?k('دخل اليوم',fmt(inc)+' <small style="display:inline">ج.م</small>','↑ 9% عن الأربعاء اللي فات'):lk('دخل اليوم')}
-    ${money?k('لسه ما اتحصّلش',fmt(due)+' <small style="display:inline">ج.م</small>',due?'محتاج متابعة':'كله متحصّل',due?'warn':''):lk('لسه ما اتحصّلش')}
-  </div>
-  <div class="grid g2">
-    <div class="grid" style="align-content:start">${ticket()}
-      <div class="card"><h3>اللي جاي في الدور<span class="sp"></span>${can('queue')?'<button class="link" data-act="go" data-v="queue">كل المواعيد</button>':''}</h3><div class="rows">${queue.filter(x=>x.status==='wait'||x.status==='book').slice(0,4).map(qRow).join('')||'<span class="sub">مفيش مواعيد تانية النهارده.</span>'}</div></div>
-    </div>
-    <div class="grid" style="align-content:start">
-      ${can('reports')||money?`<div class="card"><h3>زيارات الأسبوع</h3>${barsHtml(week)}</div>`:''}
-      <div class="card"><h3>محتاج انتباهك</h3><div class="rows">
-        ${can('clinical')?'<div class="row-i"><span class="who"><b>ياسين محمود عنده حساسية بنسلين</b><span>راجع الروشتة قبل الطباعة</span></span></div>':''}
-        ${money?'<div class="row-i"><span class="who"><b>ليلى حسام عليها 600 ج.م</b><span>من زيارة 14 أكتوبر</span></span><button class="link" data-act="go" data-v="billing">المدفوعات</button></div>':''}
-        <div class="row-i"><span class="who"><b>3 مرضى ما أكدوش حجز بكرة</b><span>رسالة التذكير اتبعتت على واتساب 9 الصبح</span></span></div>
-        ${can('plan')?'<div class="row-i"><span class="who"><b>الاشتراك هيتجدد 9 ديسمبر</b><span>باقة العيادة · 699 ج.م شهريًا</span></span><button class="link" data-act="go" data-v="plan">الاشتراك</button></div>':''}
-      </div></div>
-    </div>
-  </div>`;
-},
-queue(){
-  const f=S.filter, list=queue.filter(x=>f==='all'||x.status===f);
-  const t=(v,l)=>`<button class="${f===v?'on':''}" data-act="filter" data-v="${v}">${l} <span class="num">${v==='all'?queue.length:queue.filter(x=>x.status===v).length}</span></button>`;
-  return `<div class="grid g2" style="grid-template-columns:1fr 1.5fr;align-items:start">
-    <div class="grid">${ticket()}<div class="card"><h3>شاشة الانتظار</h3><p class="sub" style="margin:0">المرضى شايفين رقم الدور على شاشة الاستقبال ومن رابط على موبايلهم.</p></div></div>
-    <div class="card"><div class="tabs">${t('all','الكل')}${t('book','محجوز')}${t('wait','في الانتظار')}${t('in','في الكشف')}${t('done','انتهى')}</div>
-    <div class="rows">${list.map(qRow).join('')||'<span class="sub">مفيش مواعيد بالحالة دي.</span>'}</div></div></div>`;
-},
-patients(){
-  if(S.pid)return patientFile();
-  const list=patients.filter(p=>(p.name+p.phone.replace(/\s/g,'')).includes(S.q.replace(/\s/g,'')));
-  return `<div class="head"><span class="sub" style="margin:0">${list.length} مريض${S.q?` · نتيجة البحث عن «${S.q}»`:''}</span><span class="sp"></span><button class="btn ghost" data-act="soon">${ic('plus')}مريض جديد</button></div>
-  <div class="card tw"><table><thead><tr><th>المريض</th><th>السن</th><th>الموبايل</th><th>آخر زيارة</th>${can('billing')?'<th>عليه</th>':''}</tr></thead><tbody>
-  ${list.map(p=>`<tr class="click" data-act="open" data-id="${p.id}"><td><b>${p.name}</b></td><td>${p.age}</td><td class="num">${p.phone}</td><td>${p.last}</td>${can('billing')?`<td>${p.bal?`<span class="chip c-due">${p.bal} ج.م</span>`:'—'}</td>`:''}</tr>`).join('')||'<tr><td colspan="5">مفيش مريض بالاسم ده. جرّب تكتب رقم الموبايل.</td></tr>'}
-  </tbody></table></div>`;
-},
-billing(){
-  const rows=queue.filter(x=>x.status!=='book'), inc=rows.reduce((s,x)=>s+x.paid,0), due=rows.reduce((s,x)=>s+x.fee-x.paid,0);
-  return `<div class="grid g3" style="margin-bottom:16px"><div class="card kpi"><small>متحصّل النهارده</small>${fmt(inc)}<em>نقدي 70% · فيزا 30%</em></div><div class="card kpi"><small>مستحق من زيارات اليوم</small>${fmt(due)}<em class="${due?'warn':''}">${due?'لسه ما اتحصّلش':'كله متحصّل'}</em></div><div class="card kpi"><small>مستحقات قديمة</small>${fmt(600)}<em class="warn">مريض واحد</em></div></div>
-  <div class="card tw"><h3>فواتير اليوم</h3><table><thead><tr><th>رقم</th><th>المريض</th><th>الخدمة</th><th>المبلغ</th><th>المدفوع</th><th>الحالة</th><th></th></tr></thead><tbody>
-  ${rows.map(x=>`<tr><td class="num">F-${1100+x.n}</td><td><b>${x.name}</b></td><td>${x.type}</td><td class="num">${x.fee}</td><td class="num">${x.paid}</td><td>${x.paid>=x.fee?'<span class="chip c-done">مدفوعة</span>':'<span class="chip c-due">مستحقة</span>'}</td><td>${x.paid<x.fee?`<button class="btn sm sun" data-act="pay" data-n="${x.n}">سجّل الدفع</button>`:`<button class="link" data-act="print">اطبع الإيصال</button>`}</td></tr>`).join('')}
-  </tbody></table></div>`;
-},
-reports(){
-  const months=[['يونيو',58],['يوليو',66],['أغسطس',61],['سبتمبر',79],['أكتوبر',88],['نوفمبر',41,1]];
-  const hb=(l,p,v)=>`<div class="hbar"><span>${l}</span><span class="tr"><i style="width:${p}%"></i></span><span class="num">${v}</span></div>`;
-  return `<div class="grid g3" style="margin-bottom:16px"><div class="card kpi"><small>دخل أكتوبر</small>${fmt(96400)}<em>↑ 11% عن سبتمبر</em></div><div class="card kpi"><small>زيارات أكتوبر</small>${fmt(312)}<em>41 مريض جديد</em></div><div class="card kpi"><small>نسبة الغياب عن الموعد</small><span class="num">7%</span><em>↓ بعد تذكير واتساب</em></div></div>
-  <div class="grid g2"><div class="card"><h3>الدخل الشهري<span class="sp"></span><button class="link" data-act="soon">نزّل Excel</button></h3>${barsHtml(months)}</div>
-  <div class="card"><h3>الزيارات حسب النوع</h3>${hb('كشف',100,168)}${hb('متابعة',52,87)}${hb('تطعيم',22,37)}${hb('استشارة',12,20)}
-  <h3 style="margin-top:18px">حسب الطبيب</h3>${hb('د. كريم',100,189)}${hb('د. سلمى',65,123)}</div></div>`;
-},
-team(){
-  const cols=['owner','doctor','reception','accountant'];
-  return `<div class="note">جرّب: غيّر أي صلاحية من الجدول، وبعدين بدّل الدور من الشريط الأصفر فوق وشوف القائمة اتغيّرت إزاي.</div>
-  <div class="card tw" style="margin-bottom:16px"><h3>أعضاء الفريق<span class="sp"></span><button class="btn sm" data-act="invite">${ic('plus')}ادعُ عضو</button></h3><table><thead><tr><th>الاسم</th><th>الدور</th><th>الحالة</th></tr></thead><tbody>
-  ${team.map(t=>`<tr><td><b>${t.name}</b></td><td>${ROLES[t.role].chip}</td><td><span class="chip ${t.st==='نشط'?'c-done':'c-wait'}">${t.st}</span></td></tr>`).join('')}</tbody></table></div>
-  <div class="card tw"><h3>مين يشوف إيه</h3><table class="mx"><thead><tr><th>الجزء</th>${cols.map(c=>`<th>${ROLES[c].chip}</th>`).join('')}</tr></thead><tbody>
-  ${MODS.map(m=>`<tr><td><b>${m.label}</b><small>${m.desc}</small></td>${cols.map(c=>`<td><button class="sw ${perms[c][m.id]?'on':''}" role="switch" aria-checked="${!!perms[c][m.id]}" aria-label="${m.label} — ${ROLES[c].chip}" ${c==='owner'?'disabled':''} data-act="perm" data-r="${c}" data-m="${m.id}"></button></td>`).join('')}</tr>`).join('')}
-  </tbody></table></div>`;
-},
-plan(){
-  const pl=(n,p,f,cur)=>`<div class="card plan ${cur?'cur':''}"><h3>${n}${cur?'<span class="sp"></span><span class="chip c-in">باقتك الحالية</span>':''}</h3><span class="num pr">${p}</span> ج.م / شهر<ul>${f.map(x=>`<li>${x}</li>`).join('')}</ul>${cur?'':`<button class="btn ghost sm" data-act="soon">انقل لباقة ${n}</button>`}</div>`;
-  return `<div class="grid g2" style="margin-bottom:16px"><div class="card"><h3>باقة العيادة<span class="sp"></span><span class="chip c-done">نشط</span></h3>
-  <p>التجديد الجاي <b>9 ديسمبر 2026</b> بمبلغ <span class="num">699</span> ج.م.</p><br>
-  <small>المستخدمون — <span class="num">4</span> من <span class="num">6</span></small><div class="meter"><i style="width:66%"></i></div>
-  <small>الأطباء — <span class="num">2</span> من <span class="num">3</span></small><div class="meter"><i style="width:66%"></i></div>
-  <button class="btn" data-act="renew">جدّد الاشتراك</button></div>
-  <div class="card tw"><h3>آخر الفواتير</h3><table><tbody>${['9 نوفمبر','9 أكتوبر','9 سبتمبر'].map(d=>`<tr><td>${d} 2026</td><td class="num">699 ج.م</td><td><span class="chip c-done">مدفوعة</span></td><td><button class="link" data-act="print">نزّل</button></td></tr>`).join('')}</tbody></table></div></div>
-  <div class="grid g3">${pl('الطبيب',349,['طبيب واحد + مساعد','مواعيد ودور وملفات مرضى','روشتة مطبوعة'])}${pl('العيادة',699,['حتى 3 أطباء و6 مستخدمين','صلاحيات لكل دور','تقارير الدخل وتذكير واتساب'],1)}${pl('المركز',1299,['أطباء ومستخدمون بلا حد','أكتر من فرع','تقارير لكل فرع ودعم بأولوية'])}</div>`;
-},
-clinics(){
-  const act=clinics.filter(c=>c.st==='نشط'), mrr=act.reduce((s,c)=>s+c.price,0);
-  const chip={نشط:'c-done',تجربة:'c-in',متأخر:'c-due',موقوف:'c-book'};
-  return `<div class="hello">العيادات المشتركة</div><div class="sub">دي الشاشة اللي بتدير منها اشتراكات عملائك: تفعّل، توقف، وتتابع التجديد.</div>
-  <div class="grid g4" style="margin-bottom:16px"><div class="card kpi"><small>عيادات نشطة</small>${fmt(act.length)}<em>من ${clinics.length} حساب</em></div><div class="card kpi"><small>الدخل الشهري المتكرر</small>${fmt(mrr)}<em>ج.م</em></div><div class="card kpi"><small>في فترة التجربة</small>${fmt(clinics.filter(c=>c.st==='تجربة').length)}<em>واحدة تنتهي خلال 4 أيام</em></div><div class="card kpi"><small>متأخر عن الدفع</small>${fmt(clinics.filter(c=>c.st==='متأخر').length)}<em class="warn">محتاج متابعة</em></div></div>
-  <div class="card tw"><table><thead><tr><th>العيادة</th><th>المدينة</th><th>الباقة</th><th>الحالة</th><th>الاشتراك</th><th></th></tr></thead><tbody>
-  ${clinics.map((c,i)=>`<tr><td><b>${c.name}</b></td><td>${c.city}</td><td>${c.plan} · <span class="num">${c.price}</span></td><td><span class="chip ${chip[c.st]}">${c.st}</span></td><td>${c.end}</td><td>${c.st==='نشط'?`<button class="btn sm ghost" data-act="cl" data-i="${i}" data-v="موقوف">أوقف</button>`:`<button class="btn sm" data-act="cl" data-i="${i}" data-v="نشط">فعّل الاشتراك</button>`}</td></tr>`).join('')}
-  </tbody></table></div>`;
-}};
-
-function patientFile(){
-  const p=patients.find(x=>x.id===S.pid);
-  const tabs=[['visits','الزيارات','clinical'],['rx','الروشتة','clinical'],['files','المرفقات','clinical'],['account','الحساب','billing']];
-  const cur=tabs.find(t=>t[0]===S.ptab), ok=can(cur[2]); let body='';
-  if(!ok)body=lockPanel(cur[2]==='clinical'?'الملف الطبي مقفول لدورك':'حساب المريض مقفول لدورك');
-  else if(S.ptab==='visits')body=`<div class="card">${[['اليوم · 10:00','التهاب في الحلق مع حرارة 38.5','مضاد حيوي 7 أيام، ومتابعة بعد أسبوع.'],['28 سبتمبر 2026','متابعة ربو','الحالة مستقرة. نفس جرعة البخاخ.'],['3 يوليو 2026','نزلة معوية','محلول جفاف وراحة يومين.']].map(v=>`<div class="visit"><time>${v[0]} · د. كريم</time><b>${v[1]}</b><div>${v[2]}</div></div>`).join('')}</div>`;
-  else if(S.ptab==='rx')body=`<div class="grid g2" style="align-items:start"><div class="rxp"><div class="rxh">℞</div>
-    ${rx.map((r,i)=>`<div class="rxl"><b>${r.d}</b><span>${r.dose}</span><span>${r.dur}</span><button data-act="rxdel" data-i="${i}" aria-label="احذف ${r.d}">${ic('x')}</button></div>`).join('')||'<div class="rxl" style="color:var(--muted);grid-template-columns:1fr">الروشتة فاضية. أضف أول دواء.</div>'}
-    <div style="margin-top:14px;display:flex;gap:8px"><button class="btn" data-act="rxsave">احفظ واطبع</button><button class="btn ghost" data-act="rxwa">ابعتها واتساب</button></div></div>
-    <form class="card form" data-form="rx"><h3>أضف دواء</h3><label>الدواء<input class="in" name="d" required placeholder="مثال: أموكسيسيلين شراب 250"></label><div class="f2"><label>الجرعة<input class="in" name="dose" required placeholder="5 مل كل 8 ساعات"></label><label>المدة<input class="in" name="dur" required placeholder="7 أيام"></label></div>
-    ${p.allergy.length?`<div class="note" style="margin:0;background:var(--rose-soft);color:#A8203F">حساسية مسجّلة: ${p.allergy.join('، ')}</div>`:''}<button class="btn ghost">${ic('plus')}أضف للروشتة</button></form></div>`;
-  else if(S.ptab==='files')body=`<div class="files">${[['PDF','تحليل صورة دم','28 سبتمبر'],['IMG','أشعة صدر','28 سبتمبر'],['PDF','تقرير حساسية','3 يوليو']].map(f=>`<div class="file"><i>${f[0]}</i><b>${f[1]}</b><div style="color:var(--muted)">${f[2]}</div></div>`).join('')}<button class="file" data-act="soon" style="border-style:dashed;color:var(--muted)"><i>+</i>ارفع أشعة أو تحليل</button></div>`;
-  else body=`<div class="card tw"><table><thead><tr><th>التاريخ</th><th>الخدمة</th><th>المبلغ</th><th>الحالة</th></tr></thead><tbody><tr><td>اليوم</td><td>كشف</td><td class="num">350</td><td>${p.bal?'<span class="chip c-due">مستحقة</span>':'<span class="chip c-done">مدفوعة</span>'}</td></tr><tr><td>28 سبتمبر</td><td>متابعة</td><td class="num">150</td><td><span class="chip c-done">مدفوعة</span></td></tr></tbody></table></div>`;
-  return `<button class="link" data-act="go" data-v="patients" style="display:inline-flex;align-items:center;margin-bottom:12px">${ic('back')}كل المرضى</button>
-  <div class="card" style="margin-bottom:16px"><div class="pf"><span class="av">${p.name[0]}</span><div style="flex:1"><h2>${p.name}</h2><div class="meta">${p.age} · <span class="num">${p.phone}</span> · آخر زيارة ${p.last}</div>
-  ${can('clinical')?`<div style="margin-top:6px">${p.allergy.map(a=>`<span class="tagx">حساسية: ${a}</span>`).join('')}${p.chronic.map(a=>`<span class="tagx b">${a}</span>`).join('')}</div>`:''}</div>
-  ${can('queue')?`<button class="btn ghost" data-act="book">احجز له موعد</button>`:''}</div></div>
-  <div class="tabs">${tabs.map(t=>`<button class="${t[0]===S.ptab?'on':''}" data-act="ptab" data-v="${t[0]}">${can(t[2])?'':ic('lock')}${t[1]}</button>`).join('')}</div>${body}`;
-}
-
-function modal(h){$('#modal').innerHTML=h?`<div class="ov" data-act="close"><div class="dlg" role="dialog" aria-modal="true">${h}</div></div>`:'';const f=$('#modal input');f&&f.focus()}
-const ACT={
-  menu(){$('#side').classList.toggle('open')},
-  go(d){go(d.v)},
-  role(d){S.role=d.v;S.pid=null;render();toast(`بتشوف النظام دلوقتي كـ ${ROLES[d.v].chip}`)},
-  filter(d){S.filter=d.v;render()},
-  st(d){const x=queue.find(q=>q.n==d.n);if(d.v==='in'){const c=queue.find(q=>q.status==='in');if(c)c.status='done'}x.status=d.v;render();toast({wait:`اتسجّل وصول ${x.name}`,in:`${x.name} دخل الكشف`,done:`انتهى كشف ${x.name}`}[d.v])},
-  pay(d){const x=queue.find(q=>q.n==d.n);const p=patients.find(p=>p.name===x.name);if(p)p.bal=0;x.paid=x.fee;render();toast(`اتسجّل دفع ${x.fee} ج.م من ${x.name}`)},
-  open(d){S.view='patients';S.pid=+d.id;S.ptab=can('clinical')?'visits':'account';render();scrollTo(0,0)},
-  ptab(d){S.ptab=d.v;render()},
-  rxdel(d){rx.splice(d.i,1);render()},
-  rxsave(){toast('اتحفظت الروشتة وراحت للطابعة')}, rxwa(){toast('الروشتة اتبعتت للمريض على واتساب')},
-  perm(d){perms[d.r][d.m]=perms[d.r][d.m]?0:1;render();toast(`${perms[d.r][d.m]?'اتفعّل':'اتقفل'} «${MODS.find(m=>m.id===d.m).label}» لدور ${ROLES[d.r].chip}`)},
-  cl(d){clinics[d.i].st=d.v;clinics[d.i].end=d.v==='نشط'?'يتجدد 11 ديسمبر':'موقوف من اليوم';render();toast(d.v==='نشط'?'اتفعّل الاشتراك':'اتوقف الاشتراك')},
-  book(){modal(`<h3>احجز موعد</h3><form class="form" data-form="book"><label>اسم المريض<input class="in" name="name" required></label><div class="f2"><label>الموبايل<input class="in" name="phone" inputmode="tel" placeholder="01xxxxxxxxx"></label><label>نوع الزيارة<select class="in" name="type"><option>كشف</option><option>متابعة</option><option>استشارة</option><option>تطعيم</option></select></label></div><div class="act"><button type="button" class="btn ghost" data-act="close" data-x="1">إلغاء</button><button class="btn">احجز الموعد</button></div></form>`)},
-  invite(){modal(`<h3>ادعُ عضو للفريق</h3><form class="form" data-form="invite"><label>الاسم<input class="in" name="name" required></label><label>الدور<select class="in" name="role"><option value="doctor">طبيب</option><option value="reception">استقبال</option><option value="accountant">محاسب</option></select></label><p class="sub" style="margin:0;font-size:13px">هيوصله رابط دعوة صالح 7 أيام، ويختار كلمة المرور بنفسه.</p><div class="act"><button type="button" class="btn ghost" data-act="close" data-x="1">إلغاء</button><button class="btn">ابعت الدعوة</button></div></form>`)},
-  renew(){toast('اتبعت طلب التجديد. هتوصلك رسالة تأكيد على واتساب')},
-  print(){toast('الإيصال راح للطابعة')},
-  soon(){toast('الجزء ده هيتبني في النسخة الكاملة')},
-  close(d,e){if(d.x||e.target.classList.contains('ov'))modal('')}
-};
-document.addEventListener('click',e=>{const t=e.target.closest('[data-act]');if(t&&ACT[t.dataset.act])ACT[t.dataset.act](t.dataset,e)});
-document.addEventListener('keydown',e=>{if(e.key==='Escape')modal('')});
-document.addEventListener('submit',e=>{
-  e.preventDefault();const f=Object.fromEntries(new FormData(e.target)),k=e.target.dataset.form;
-  if(k==='rx'){rx.push(f);render()}
-  if(k==='book'){const n=Math.max(...queue.map(q=>q.n))+1;queue.push({n,pid:1,name:f.name,type:f.type,time:'12:40',status:'book',fee:f.type==='كشف'?350:200,paid:0});modal('');S.view='queue';S.filter='all';S.pid=null;render();toast(`اتحجز موعد ${f.name} — رقم الدور ${n}`)}
-  if(k==='invite'){team.push({name:f.name,role:f.role,st:'دعوة مرسلة'});modal('');render();toast(`اتبعتت الدعوة لـ ${f.name}`)}
-});
-$('#q').addEventListener('input',e=>{S.q=e.target.value.trim();S.view='patients';S.pid=null;render()});
-document.querySelector('.menu').innerHTML=ic('menu');$('#sic').innerHTML=ic('search');$('#bookBtn').innerHTML=ic('plus')+'احجز موعد';
-render();
-</script>
+<script src="system.js"></script>
 </body>
 </html>
